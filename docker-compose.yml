@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  batchserve:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: batchserve-engine
+    ports:
+      - "8000:8000"
+    environment:
+      - BATCHSERVE_HOST=0.0.0.0
+      - BATCHSERVE_PORT=8000
+      - BATCHSERVE_BLOCK_SIZE=16
+      - BATCHSERVE_TOTAL_BLOCKS=128
+      - BATCHSERVE_MAX_BATCH_SIZE=32
+      - BATCHSERVE_WATERMARK_BLOCKS=4
+      - BATCHSERVE_ENABLE_PREFIX_CACHING=true
+      - BATCHSERVE_SIMULATED_STEP_LATENCY_MS=4.0
+      - BATCHSERVE_LOG_LEVEL=INFO
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    restart: unless-stopped
+
